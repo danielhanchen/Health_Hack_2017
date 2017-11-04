@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[325]:
+# In[449]:
 
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen
@@ -37,7 +37,7 @@ for rows in arange(0,1000,15):
                 result["Go_id"] = each.split('</a>')[0].split('>')[-1]
                 result["Deadline"] = each.split('\t\t')[1].split('\n')[0].lstrip().rstrip()
                 if result["Deadline"] == '':
-                    result["Deadline"] = 'NOT SURE'
+                    result["Deadline"] = 'NA'
                     
                 result["Agency"] = each.split('inner">')[3].split('</')[0]
                 result["Category"] = [each.split('inner">')[4].split('</')[0]]
@@ -56,7 +56,7 @@ for rows in arange(0,1000,15):
                     try:
                         result[want] = process(full_details.split(want)[1].split('</')[1].split('>')[-1].lstrip().rstrip())
                     except:
-                        result[want] = "NULL"
+                        result[want] = " "
 
                 need = ["Description", "Eligibility", "Instructions for Lodgement"]
                 for x,y in zip(need, need[1:]):
@@ -68,27 +68,27 @@ for rows in arange(0,1000,15):
                     result['Description'] += "\nGrant Activity Timeframe = "
                     result['Description'] += process(full_details.split("Grant Activity Timeframe")[1].split('</div>')[0].split('"list-desc-inner">')[1]                        .replace('<p>','').replace('</p>',' ').rstrip().replace('\n',' '))
                 except:
-                    result['Description'] += "NULL"
+                    result['Description'] += " "
 
                 try:
                     result['Instructions for Lodgement'] += "\nOther Instructions = "
                     result['Instructions for Lodgement'] += process(full_details.split("Other Instructions")[1].split('</div>')[0].split('"list-desc-inner">')[1]                        .replace('<p>','').replace('</p>',' ').rstrip().replace('\n',' '))
                 except:
-                    result['Instructions for Lodgement'] += "NULL"
+                    result['Instructions for Lodgement'] += " "
 
                 try:
                     result['Description'] += "\nAddenda Available = "
                     result['Description'] += process(full_details.split("Addenda Available")[1].split('</div>')[0].split('"list-desc-inner">')[1]                        .replace('<p>','').replace('</p>',' ').rstrip().replace('\n',' '))
                 except:
-                    result['Description'] += "NOT SURE"
+                    result['Description'] += "NA"
 
-                result['Total Grant Amount'] = "NOT SURE"
+                result['Total Grant Amount'] = "NA"
                 try:
                     result['Total Grant Amount'] = process(full_details.split("Total Amount Available")[1].split('</div>')[0].split('"list-desc-inner">')[1]                        .replace('<p>','').replace('</p>',' ').rstrip().replace('\n',' '))
                 except:
                     pass
 
-                result['Estimated Grant Value'] = "NOT SURE"
+                result['Estimated Grant Value'] = "NA"
                 try:
                     result['Estimated Grant Value'] = process(full_details.split("Estimated Grant Value")[1].split('</div>')[0].split('"list-desc-inner">')[1]                        .replace('<p>','').replace('</p>',' ').rstrip().replace('\n',' '))
                 except:
@@ -107,7 +107,7 @@ for rows in arange(0,1000,15):
         break
 
 
-# In[326]:
+# In[450]:
 
 table = DataFrame(data).T
 table.to_json(path_or_buf = "Aus Gov Grants.json", orient = 'table')
@@ -115,7 +115,7 @@ table.to_json(path_or_buf = "Aus Gov Grants.json", orient = 'table')
 table["From where"] = "www.grants.gov.au"
 
 
-# In[327]:
+# In[451]:
 
 site = "https://www.dementiaresearchfoundation.org.au/research-grants"
 
@@ -123,12 +123,12 @@ html = soup(urlopen(site))
 text = str(html.find_all('div')).split('<div class="field-item even" property="content:encoded">')        [1].split('<h2>')[1:-1]
 
 
-# In[328]:
+# In[452]:
 
 table["New Grants"] = 1
 
 
-# In[329]:
+# In[453]:
 
 data = {}
 
@@ -149,34 +149,34 @@ for grant in text:
     result["Site"] = 'https://www.dementiaresearchfoundation.org.au/research-grants'
     result["From where"] = 'www.dementiaresearchfoundation.org.au'
 
-    result['Internal Reference ID'] = 'NULL'
+    result['Internal Reference ID'] = ' '
 
-    result["Go_id"] = "NULL"
-    result["Eligibility"] = "NOT SURE"
+    result["Go_id"] = " "
+    result["Eligibility"] = "NA"
 
     result["New Grants"] = 0
-    result['Instructions for Lodgement'] = "NOT SURE"
-    result['Email'] = "NULL"
-    result['Total Grant Amount'] = "NOT SURE"
+    result['Instructions for Lodgement'] = "NA"
+    result['Email'] = " "
+    result['Total Grant Amount'] = "NA"
     result['Deadline'] = "CLOSED"
     
     data[result["Title"]] = result
 
 
-# In[330]:
+# In[454]:
 
 revs = []
 for x in table['Estimated Grant Value'].values:
-    if x != 'NOT SURE':
+    if x != 'NA':
         ranges = x.split('From')[-1]
         rev = ranges.split('to')[-1].replace(',','').replace('$','')             .replace('.00','')
         revs.append(int(rev.rstrip().lstrip()))
     else:
-        revs.append('NOT SURE')
+        revs.append('NA')
 
 total = []
 for u in revs:
-    if u != 'NOT SURE':
+    if u != 'NA':
         if u >= 500000: u = "HIGH"
         elif u >= 100000: u = "MEDIUM"
         else: u = "LOW"
@@ -185,7 +185,7 @@ for u in revs:
 table["Grant Range"] = total
 
 
-# In[331]:
+# In[455]:
 
 table2 = DataFrame(data).T
 
@@ -194,7 +194,7 @@ table = concat([table,table2])
 table.to_json(path_or_buf = "Aus Gov Grants.json", orient = 'table')
 
 
-# In[332]:
+# In[456]:
 
 site = "https://www.curebraincancer.org.au/page/197/funding-options"
 
@@ -202,7 +202,7 @@ html = soup(urlopen(site))
 text = str(html.find_all('div')).split('<div class="cms-inner">')
 
 
-# In[333]:
+# In[457]:
 
 text3 = text[1].split('DONATE')[0].split('<h3><a id="')[1:]
 
@@ -227,19 +227,19 @@ for grant in text3:
     result["Site"] = 'https://www.curebraincancer.org.au/page/197/funding-options'
     result["From where"] = 'www.curebraincancer.org.au'
 
-    result["Go_id"] = "NULL"
-    result['Internal Reference ID'] = "NULL"
-    result['Instructions for Lodgement'] = "NULL"
+    result["Go_id"] = " "
+    result['Internal Reference ID'] = " "
+    result['Instructions for Lodgement'] = " "
     result['New Grants'] = (1-('Deadline passed' in grant)*1)
 
     result['Publish Date'] = text[1].split('Opportunities')[0].split('<h1>')[-1].lstrip().rstrip()
 
-    result['Total Grant Amount'] = "NOT SURE"
+    result['Total Grant Amount'] = "NA"
     
     data[result['Title']] = result
 
 
-# In[334]:
+# In[458]:
 
 totals = []
 table3 = DataFrame(data).T
@@ -249,12 +249,12 @@ for y in table3['Estimated Grant Value']:
         totals.append(sum([int(x.split(' ')[0].replace(',','')) 
                        for x in y.split('$')[1:]]))
     except:
-        totals.append('NOT SURE')
+        totals.append('NA')
 table3['Estimated Grant Value'] = totals
 
 total = []
 for u in totals:
-    if u != 'NOT SURE':
+    if u != 'NA':
         if u >= 500000: u = "HIGH"
         elif u >= 100000: u = "MEDIUM"
         else: u = "LOW"
@@ -267,16 +267,45 @@ table = concat([table,table3])
 table.to_json(path_or_buf = "Aus Gov Grants.json", orient = 'table')
 
 
-# In[362]:
+# In[486]:
 
-site = 'https://www.business.gov.au/assistance/results?q='
+from selenium import webdriver
 
-html = soup(urlopen(site))
+driver = webdriver.Firefox(executable_path=
+                           r'C:\Users\danielhanchen\Desktop\geckodriver.exe')
+driver.implicitly_wait(30)
+driver.maximize_window()
+
+driver.get("https://www.business.gov.au/assistance/results?q=")
+
+
+# In[487]:
+
+from time import sleep
+
+
+# In[488]:
+
+for x in range(100000):
+    try:
+        buttons = driver.find_elements_by_xpath("//*[contains(text(), 'Show more')]")
+
+        for btn in buttons:
+            btn.click()
+            sleep(1)
+    except:
+        break
+
+
+# In[489]:
+
+html = soup(driver.page_source)
+
 text = str(html.find_all('div')).split(
     '<div class="search-result-card__content">')[1:][0:-1]
 
 
-# In[414]:
+# In[490]:
 
 data = {}
 
@@ -284,14 +313,17 @@ for grant in text:
     result = {}
     result["Title"] = grant.split('<a href="/')[1].split('">')[1].split('</')[0]
 
-    result["Description"] = process(grant.split('Open')[1].split('<h3>')[0])
-
+    try:
+        result["Description"] = process(grant.split('Open')[1].split('<h3>')[0])
+    except:
+        result["Description"] = grant.split('<p>\n')[1].split('</p>')[0]
+    
     parra = grant.split('Who can apply')
     if len(parra) != 1:
         parra = process(parra[-1]).replace(':','').replace('\n\n','\n')
         result['Eligibility'] = parra
     else:
-        result['Eligibility'] = "NOT SURE"
+        result['Eligibility'] = "NA"
 
     result['Deadline'] = "2017"
 
@@ -302,13 +334,13 @@ for grant in text:
     try:
         result['Estimated Grant Value'] = int(result["Description"].split("$")[-1].replace(' million',',000,000')        .split(' ')[0].replace(',',''))
     except:
-        result['Estimated Grant Value'] = 'NOT SURE'
+        result['Estimated Grant Value'] = 'NA'
         
     result["From where"] = 'https://www.business.gov.au/assistance/results?q='
 
-    result['Go_id'] = 'NULL'
+    result['Go_id'] = ' '
 
-    result['Internal Reference ID'] = "NULL"
+    result['Internal Reference ID'] = " "
 
     result['New Grants'] = 1
     result["Publish Date"] = '2017'
@@ -324,7 +356,7 @@ totals = table4["Estimated Grant Value"]
 
 total = []
 for u in totals:
-    if u != 'NOT SURE':
+    if u != 'NA':
         if u >= 500000: u = "HIGH"
         elif u >= 100000: u = "MEDIUM"
         else: u = "LOW"
@@ -333,14 +365,14 @@ for u in totals:
 table4["Grant Range"] = total
 
 
-# In[416]:
+# In[491]:
 
 table = concat([table,table4])
 
 table.to_json(path_or_buf = "Aus Gov Grants.json", orient = 'table')
 
 
-# In[336]:
+# In[492]:
 
 lists = []
 for u in table["Category"]:
